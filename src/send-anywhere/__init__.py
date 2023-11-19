@@ -2,10 +2,21 @@ import requests
 import json
 
 class Send_Anywhere_Error(Exception):
+    """Custom exception for Send Anywhere API errors."""
     pass
 
 class Device:
     def __init__(self, api_key: str) -> None:
+        """\
+Initialize a Send Anywhere Device object.
+
+Parameters:
+- api_key (str): The API key required for authentication.
+
+Raises:
+- Send_Anywhere_Error: If there's an error in the API response.
+"""
+
         profile_name: str="send-anywhere-python"
         self.headers = {
             "User-Agent": "send-anywhere-python",
@@ -22,6 +33,20 @@ class Device:
         self.cookies = self.session.cookies
     
     def send_files(self, abs_paths: list) -> str:
+        """\
+Send files using the Send Anywhere API.
+
+Parameters:
+- abs_paths (list): List of absolute paths to the files to be sent.
+
+Returns:
+- str: The generated key for file transfer.
+
+Raises:
+- ValueError: If the list of paths is empty.
+- Send_Anywhere_Error: If there's an error in the API response.
+"""
+
         if not abs_paths:
             raise ValueError("list of paths is empty")
         body = {
@@ -43,6 +68,19 @@ class Device:
         return response['key']
     
     def recieve_files(self, code: str) -> bytes:
+        """\
+Receive files using the Send Anywhere API.
+
+Parameters:
+- code (str): The 6-digit key for receiving files.
+
+Returns:
+- bytes: The content of the received file.
+
+Raises:
+- Send_Anywhere_Error: If there's an error in the API response.
+"""
+
         response = requests.get(f"https://send-anywhere.com/web/v1/key/{code}", headers=self.headers, cookies=self.cookies)
         if (not response.status_code==200) or ("error" in response.json()):
             raise Send_Anywhere_Error(response.json['error'])
