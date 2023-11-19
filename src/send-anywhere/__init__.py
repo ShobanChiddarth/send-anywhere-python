@@ -67,12 +67,12 @@ Raises:
 
         return response['key']
     
-    def recieve_files(self, code: str) -> bytes:
+    def recieve_files(self, key: str) -> bytes:
         """\
 Receive files using the Send Anywhere API.
 
 Parameters:
-- code (str): The 6-digit key for receiving files.
+- key (str): The 6-digit key for receiving files.
 
 Returns:
 - bytes: The content of the received file.
@@ -81,7 +81,7 @@ Raises:
 - Send_Anywhere_Error: If there's an error in the API response.
 """
 
-        response = requests.get(f"https://send-anywhere.com/web/v1/key/{code}", headers=self.headers, cookies=self.cookies)
+        response = requests.get(f"https://send-anywhere.com/web/v1/key/{key}", headers=self.headers, cookies=self.cookies)
         if (not response.status_code==200) or ("error" in response.json()):
             raise Send_Anywhere_Error(response.json['error'])
         file_data = requests.get(response.json()['weblink']).content
