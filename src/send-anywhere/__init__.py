@@ -67,7 +67,7 @@ Raises:
 
         return response['key']
     
-    def recieve_files(self, key: str) -> bytes:
+    def receive_files(self, key: str) -> bytes:
         """\
 Receive files using the Send Anywhere API.
 
