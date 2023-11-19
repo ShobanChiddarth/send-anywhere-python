@@ -47,8 +47,3 @@ class Device:
             raise Send_Anywhere_Error(response.json['error'])
         file_data = requests.get(response.json()['weblink']).content
         return file_data
-
-
-
-
-d = Device("sample")
