@@ -14,7 +14,7 @@ class Device:
         response = self.session.get("https://send-anywhere.com/web/v1/device", headers=self.headers)
         response_dict = response.json()
 
-        if "error" in self.response_dict:
+        if (not response.status_code==200) or ("error" in response_dict):
             raise Send_Anywhere_Error(response_dict['error'])
         else:
             self.device_key = response_dict['device_key']
@@ -26,19 +26,26 @@ class Device:
         body = {
             "file": abs_paths
         }
-        response = requests.get("https://send-anywhere.com/web/v1/key", headers=self.headers, cookies=self.cookies, body=json.dumps(body)).json()
+        response = requests.get("https://send-anywhere.com/web/v1/key", headers=self.headers, cookies=self.cookies, body=json.dumps(body))
+        if (not response.status_code==200) or ("error" in response.json()):
+            raise Send_Anywhere_Error(response.json['error'])
+        
 
-        weblink = response['weblink']
+        weblink = response.json()['weblink']
         files_to_post = []
         for filepath in abs_paths:
             files_to_post.append(open(filepath, 'rb'))
-        requests.post(response['weblink'], files=files_to_post)
+        requests.post(weblink, files=files_to_post)
+        for fh in files_to_post:
+            fh.close()
 
         return response['key']
     
     def recieve_files(self, code: str) -> bytes:
-        response = requests.get(f"https://send-anywhere.com/web/v1/key/{code}", headers=self.headers, cookies=self.cookies).json()
-        file_data = requests.get(response['weblink']).content
+        response = requests.get(f"https://send-anywhere.com/web/v1/key/{code}", headers=self.headers, cookies=self.cookies)
+        if (not response.status_code==200) or ("error" in response.json()):
+            raise Send_Anywhere_Error(response.json['error'])
+        file_data = requests.get(response.json()['weblink']).content
         return file_data
 
 
