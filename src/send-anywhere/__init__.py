@@ -20,7 +20,7 @@ class Device:
             self.device_key = response_dict['device_key']
         self.cookies = self.session.cookies
     
-    def send_files(self, abs_paths: list):
+    def send_files(self, abs_paths: list) -> str:
         if not abs_paths:
             raise ValueError("list of paths is empty")
         body = {
@@ -35,6 +35,12 @@ class Device:
         requests.post(response['weblink'], files=files_to_post)
 
         return response['key']
+    
+    def recieve_files(self, code: str) -> bytes:
+        response = requests.get(f"https://send-anywhere.com/web/v1/key/{code}", headers=self.headers, cookies=self.cookies).json()
+        file_data = requests.get(response['weblink']).content
+        return file_data
+
 
 
 
