@@ -5,7 +5,8 @@ class Send_Anywhere_Error(Exception):
     pass
 
 class Device:
-    def __init__(self, api_key: str, profile_name: str="send-anywhere-python") -> None:
+    def __init__(self, api_key: str) -> None:
+        profile_name: str="send-anywhere-python"
         self.headers = {
             "User-Agent": "send-anywhere-python",
             "X-Api-Key": api_key,
