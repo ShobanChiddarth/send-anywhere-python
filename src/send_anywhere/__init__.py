@@ -82,17 +82,19 @@ Raises:
         self.headers = {
             "User-Agent": "send-anywhere-python",
             "X-Api-Key": api_key,
+            "Content-Type": "application/json"
         }
         self.session = requests.Session()
         response = self.session.get("https://send-anywhere.com/web/v1/device",
                                     headers=self.headers,
-                                    params={"profile_name", profile_name})
-        response_dict = response.json()
+                                    params={"profile_name": profile_name})
 
-        if (not response.status_code == 200) or ("error" in response_dict):
-            raise Send_Anywhere_Error(response_dict['error'])
+
+        if (not response.status_code == 200) or ("error" in response):
+            raise Send_Anywhere_Error(response.text)
         else:
-            self.device_key = response_dict['device_key']
+            self.device_key = response.json()['device_key']
+
         self.cookies = self.session.cookies
 
     def send_files(self, abs_paths: list) -> str:
