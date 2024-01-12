@@ -46,6 +46,8 @@ except Send_Anywhere_Error as e:
 Note: Replace "YOUR_API_KEY" with your actual Send Anywhere API key.
 """
 import json
+import os
+import sys
 import requests
 
 
@@ -114,15 +116,31 @@ Raises:
 
         if not abs_paths:
             raise ValueError("list of paths is empty")
-        body = {
-            "file": abs_paths
+        
+        params = {
+            "file": []
         }
-        response = requests.get("https://send-anywhere.com/web/v1/key",
-                                headers=self.headers, cookies=self.cookies,
-                                body=json.dumps(body),
+        for filepath in abs_paths:
+            params["file"].append({"name":os.path.basename(filepath), "size": os.path.getsize(filepath)})
+        print(params)
+        params_str = json.dumps(params)
+        response = requests.get("https://send-anywhere.com/web/v1/key/",
+                                headers=self.headers,
+                                cookies=self.cookies,
+                                data=params,
+                                # params=params,
+                                # params=params_str,
+                                # json=params,
+                                # data=params_str,
                                 timeout = 600)
+        print(response.status_code)
+        print(response.url)
+        print(response.text)
+
+        # print()
         if (not response.status_code == 200) or ("error" in response.json()):
-            raise Send_Anywhere_Error(response.json['error'])
+            sys.exit()
+            raise Send_Anywhere_Error(response.text)
 
         weblink = response.json()['weblink']
         files_to_post = []
@@ -132,7 +150,7 @@ Raises:
         for fh in files_to_post:
             fh.close()
 
-        return response['key']
+        return response.json()['key']
 
     def receive_files(self, key: str) -> bytes:
         """\
